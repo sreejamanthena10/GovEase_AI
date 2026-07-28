@@ -41,37 +41,90 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-type Stage = "idle" | "uploading" | "analyzing" | "done";
+type Stage = "idle" | "uploading" | "analyzing" | "done" | "error";
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
 
 function Page() {
   const [assistantActive, setAssistantActive] = useState(false);
   const [stage, setStage] = useState<Stage>("idle");
   const [progress, setProgress] = useState(0);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const progressTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const analyze = useServerFn(analyzeDocument);
 
   const handleUploadClick = useCallback(() => fileInputRef.current?.click(), []);
 
-  const runProcessing = useCallback((name: string) => {
-    setFileName(name);
-    setStage("uploading");
+  const startProgress = useCallback(() => {
+    if (progressTimer.current) clearInterval(progressTimer.current);
     setProgress(0);
     let p = 0;
-    const t = setInterval(() => {
-      p += 8 + Math.random() * 10;
-      if (p >= 60 && p < 100) setStage("analyzing");
-      if (p >= 100) {
-        p = 100;
-        setStage("done");
-        clearInterval(t);
-      }
-      setProgress(Math.min(100, p));
-    }, 140);
+    progressTimer.current = setInterval(() => {
+      // Ease toward 90% while waiting on the AI; final jump to 100 on success.
+      p += Math.max(0.6, (90 - p) * 0.06);
+      setProgress(Math.min(90, p));
+    }, 160);
   }, []);
+
+  const stopProgress = useCallback((final: number) => {
+    if (progressTimer.current) {
+      clearInterval(progressTimer.current);
+      progressTimer.current = null;
+    }
+    setProgress(final);
+  }, []);
+
+  const runProcessing = useCallback(
+    async (file: File) => {
+      setFileName(file.name);
+      setResult(null);
+      setErrorMsg(null);
+      setStage("uploading");
+      startProgress();
+
+      try {
+        if (file.size > 15 * 1024 * 1024) {
+          throw new Error("File is larger than 15 MB. Please upload a smaller document.");
+        }
+        const dataBase64 = await fileToBase64(file);
+        setStage("analyzing");
+        const res = await analyze({
+          data: {
+            filename: file.name,
+            mime: file.type || "application/octet-stream",
+            dataBase64,
+          },
+        });
+        stopProgress(100);
+        setResult(res);
+        setStage("done");
+      } catch (err) {
+        stopProgress(0);
+        setStage("error");
+        setErrorMsg(err instanceof Error ? err.message : "Something went wrong analysing this document.");
+      }
+    },
+    [analyze, startProgress, stopProgress],
+  );
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f) runProcessing(f.name);
+    if (f) void runProcessing(f);
+    e.target.value = "";
   };
 
   return (
@@ -81,7 +134,7 @@ function Page() {
         type="file"
         onChange={onFileChange}
         className="hidden"
-        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp"
       />
 
       <Header />
@@ -134,11 +187,30 @@ function Page() {
         fileName={fileName}
         onUpload={handleUploadClick}
       />
+
+      {(result || errorMsg || stage === "analyzing" || stage === "uploading") && (
+        <AnalysisPanel
+          stage={stage}
+          fileName={fileName}
+          result={result}
+          errorMsg={errorMsg}
+          onDismiss={() => {
+            setResult(null);
+            setErrorMsg(null);
+            setStage("idle");
+            setFileName(null);
+            setProgress(0);
+          }}
+          onRetry={handleUploadClick}
+        />
+      )}
+
       <ImpactSection />
       <Footer />
     </main>
   );
 }
+
 
 /* ---------- Header ---------- */
 function Header() {
