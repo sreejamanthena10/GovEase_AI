@@ -1,24 +1,600 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Bot,
+  Brain,
+  MessageSquareText,
+  ListChecks,
+  FileEdit,
+  ShieldCheck,
+  Target,
+  UploadCloud,
+  Cpu,
+  MessageCircle,
+  ListOrdered,
+  ClipboardList,
+  BellRing,
+  Globe2,
+  Lock,
+  CheckCircle2,
+  Sparkles,
+  ArrowRight,
+  FileText,
+} from "lucide-react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: Page,
+  head: () => ({
+    meta: [
+      { title: "Project Viksit Bharat 2026 — AI Document Assistant" },
+      {
+        name: "description",
+        content:
+          "AI-powered assistant that simplifies government paperwork with plain-language explanations, step-by-step guidance, and secure auto-fill.",
+      },
+    ],
+  }),
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+type Stage = "idle" | "uploading" | "analyzing" | "done";
+
+function Page() {
+  const [assistantActive, setAssistantActive] = useState(false);
+  const [stage, setStage] = useState<Stage>("idle");
+  const [progress, setProgress] = useState(0);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadClick = useCallback(() => fileInputRef.current?.click(), []);
+
+  const runProcessing = useCallback((name: string) => {
+    setFileName(name);
+    setStage("uploading");
+    setProgress(0);
+    let p = 0;
+    const t = setInterval(() => {
+      p += 8 + Math.random() * 10;
+      if (p >= 60 && p < 100) setStage("analyzing");
+      if (p >= 100) {
+        p = 100;
+        setStage("done");
+        clearInterval(t);
+      }
+      setProgress(Math.min(100, p));
+    }, 140);
+  }, []);
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) runProcessing(f.name);
+  };
+
+  return (
+    <main className="min-h-screen bg-radial-hero text-foreground">
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={onFileChange}
+        className="hidden"
+        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+      />
+
+      <Header />
+
+      <section className="mx-auto max-w-7xl px-6 pt-8 pb-14 md:pt-14 md:pb-24 animate-fade-up">
+        <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
+          <Badge>Domain · Artificial Intelligence</Badge>
+          <Badge variant="solid">Problem Statement 12</Badge>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-stretch">
+          <div className="flex flex-col justify-center animate-fade-up" style={{ animationDelay: "0.05s" }}>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.02]">
+              Lost in <br />
+              <span className="text-gradient-primary">Government</span> <br />
+              Paperwork
+            </h1>
+            <p className="mt-6 max-w-lg text-lg text-muted-foreground leading-relaxed">
+              A small business owner wants to register his business but cannot
+              understand lengthy government documents written in technical language.
+              We turn that friction into a guided, confident experience.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <button
+                onClick={handleUploadClick}
+                className="group relative inline-flex items-center gap-2 rounded-full bg-gradient-primary px-6 py-3.5 font-semibold text-primary-foreground shadow-lg glow-primary animate-pulse-ring transition-transform hover:scale-[1.03] active:scale-[0.98]"
+              >
+                <UploadCloud className="h-5 w-5" />
+                Upload and Simplify
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </button>
+              <button
+                onClick={() => setAssistantActive((v) => !v)}
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-6 py-3.5 font-medium text-foreground/90 transition hover:border-primary/60 hover:text-foreground"
+              >
+                <Sparkles className="h-4 w-4 text-primary-glow" />
+                {assistantActive ? "Hide" : "Preview"} Assistant
+              </button>
+            </div>
+          </div>
+
+          <AssistantCard active={assistantActive} onToggle={() => setAssistantActive((v) => !v)} />
+        </div>
+      </section>
+
+      <ChallengeSection />
+      <SolutionSection
+        stage={stage}
+        progress={progress}
+        fileName={fileName}
+        onUpload={handleUploadClick}
+      />
+      <ImpactSection />
+      <Footer />
+    </main>
+  );
+}
+
+/* ---------- Header ---------- */
+function Header() {
+  return (
+    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <div className="flex items-center gap-3">
+          <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-primary shadow-lg glow-primary">
+            <span className="font-display text-lg font-bold text-primary-foreground">A</span>
+          </div>
+          <div className="leading-tight">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              Frontend Arena
+            </div>
+            <div className="text-sm font-semibold">
+              Project <span className="text-gradient-primary">Viksit Bharat</span> 2026
+            </div>
+          </div>
+        </div>
+
+        <nav className="hidden items-center gap-8 md:flex">
+          {["Problem", "Challenge", "Solution", "Impact"].map((l) => (
+            <a
+              key={l}
+              href={`#${l.toLowerCase()}`}
+              className="text-sm font-medium text-muted-foreground transition hover:text-foreground"
+            >
+              {l}
+            </a>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-3">
+          <div className="hidden text-right text-xs md:block">
+            <div className="font-semibold">AI Assistant</div>
+            <div className="text-muted-foreground">Online</div>
+          </div>
+          <div className="relative flex h-11 w-11 items-center justify-center rounded-full bg-surface-elevated border border-primary/30 animate-breathe">
+            <Bot className="h-5 w-5 text-primary-glow" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-success ring-2 ring-background" />
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+/* ---------- Badge ---------- */
+function Badge({
+  children,
+  variant = "outline",
+}: {
+  children: React.ReactNode;
+  variant?: "outline" | "solid";
+}) {
+  return (
+    <span
+      className={
+        "inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] " +
+        (variant === "solid"
+          ? "bg-gradient-primary text-primary-foreground shadow-lg glow-primary"
+          : "border border-primary/40 bg-surface/50 text-primary-glow")
+      }
+    >
+      {children}
+    </span>
+  );
+}
+
+/* ---------- Assistant Card ---------- */
+function AssistantCard({ active, onToggle }: { active: boolean; onToggle: () => void }) {
   return (
     <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
+      className="relative min-h-[440px] lg:min-h-[520px] [perspective:1600px] animate-fade-up"
+      style={{ animationDelay: "0.15s" }}
+      onMouseEnter={() => !active && onToggle()}
+      onMouseLeave={() => active && onToggle()}
     >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
+      <div
+        className="relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d]"
+        style={{ transform: active ? "rotateY(180deg)" : "rotateY(0deg)" }}
+      >
+        {/* Front */}
+        <div className="absolute inset-0 [backface-visibility:hidden] rounded-3xl glass overflow-hidden">
+          <div className="relative h-full w-full">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-transparent to-primary-glow/20" />
+            <div className="absolute inset-0 flex flex-col justify-end p-8">
+              <div className="max-w-sm rounded-2xl bg-background/70 p-5 backdrop-blur-md border border-border">
+                <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary-glow">
+                  <FileText className="h-3.5 w-3.5" /> The Problem
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  "I don't understand this form… it's too complicated!"
+                </p>
+              </div>
+            </div>
+            <div className="absolute top-6 right-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-elevated border border-primary/40 animate-float">
+              <Brain className="h-7 w-7 text-primary-glow" />
+            </div>
+            <div className="absolute top-6 left-6 rounded-full bg-background/70 backdrop-blur px-3 py-1 text-xs text-muted-foreground">
+              Hover to meet the AI →
+            </div>
+          </div>
+        </div>
+
+        {/* Back */}
+        <div
+          className="absolute inset-0 rounded-3xl glass p-6 [backface-visibility:hidden]"
+          style={{ transform: "rotateY(180deg)" }}
+        >
+          <div className="flex items-center gap-3 border-b border-border pb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
+              <Bot className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold">AI Assistant</div>
+              <div className="flex items-center gap-1.5 text-xs text-success">
+                <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Online now
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-3 overflow-y-auto max-h-[380px] pr-1">
+            <ChatBubble>
+              Hello! I'm here to help you understand government documents and
+              complete your processes easily.
+            </ChatBubble>
+
+            <div className="rounded-2xl border border-primary/30 bg-surface/60 p-4">
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary-glow">
+                <Sparkles className="h-3.5 w-3.5" /> Simplified Explanation
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                You need to register your business on the Udyam Portal. Here are the simple steps:
+              </p>
+              <ul className="space-y-2 text-sm">
+                {[
+                  "Fill basic business details",
+                  "Upload required documents",
+                  "Verify & submit",
+                  "Receive your Udyam Certificate",
+                ].map((s) => (
+                  <li key={s} className="flex items-start gap-2">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <ChatBubble>Would you like me to guide you step-by-step?</ChatBubble>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChatBubble({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="max-w-[92%] rounded-2xl rounded-tl-sm bg-surface-elevated/80 border border-border px-4 py-3 text-sm text-foreground/90">
+      {children}
+    </div>
+  );
+}
+
+/* ---------- Challenge Section ---------- */
+const CHALLENGES = [
+  { icon: Brain, title: "Understand", desc: "AI reads & understands complex documents" },
+  { icon: MessageSquareText, title: "Explain Simply", desc: "Converts technical language into simple terms" },
+  { icon: ListChecks, title: "Guide Step-by-Step", desc: "Provides clear actions & next steps" },
+  { icon: FileEdit, title: "Auto-Fill Forms", desc: "Helps fill forms with correct information" },
+  { icon: ShieldCheck, title: "Build Confidence", desc: "Empowers citizens to complete processes easily" },
+  { icon: Target, title: "Real Impact", desc: "Reduces friction across government workflows" },
+];
+
+function ChallengeSection() {
+  return (
+    <section id="challenge" className="mx-auto max-w-7xl px-6 py-16 md:py-24">
+      <SectionHeader
+        eyebrow="Your Challenge"
+        title="Build an AI-powered assistant"
+        subtitle="that explains official documents in simple language and helps citizens complete government processes with confidence."
+        icon={<Target className="h-5 w-5" />}
       />
+
+      <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {CHALLENGES.map((c, i) => (
+          <StaggerTile key={c.title} delay={i * 70}>
+            <ChallengeTile icon={c.icon} title={c.title} desc={c.desc} />
+          </StaggerTile>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ChallengeTile({
+  icon: Icon,
+  title,
+  desc,
+}: {
+  icon: typeof Brain;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <div className="group relative aspect-square rounded-2xl border border-border bg-surface/50 p-5 transition-all duration-300 hover:-translate-y-2 hover:border-primary/60 hover:glow-primary">
+      <div className="flex h-full flex-col">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-primary shadow-lg transition-transform group-hover:scale-110">
+          <Icon className="h-6 w-6 text-primary-foreground" />
+        </div>
+        <div className="mt-auto">
+          <h3 className="text-base font-semibold">{title}</h3>
+          <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{desc}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StaggerTile({ children, delay }: { children: React.ReactNode; delay: number }) {
+  return (
+    <div className="animate-fade-up opacity-0" style={{ animationDelay: `${delay}ms`, animationFillMode: "forwards" }}>
+      {children}
+    </div>
+  );
+}
+
+/* ---------- Solution Section ---------- */
+type SolutionKey =
+  | "upload"
+  | "analysis"
+  | "explain"
+  | "steps"
+  | "form"
+  | "reminders"
+  | "multilingual"
+  | "secure";
+
+const SOLUTIONS: { key: SolutionKey; icon: typeof UploadCloud; title: string; desc: string }[] = [
+  { key: "upload", icon: UploadCloud, title: "Document Upload", desc: "Drag, drop or pick — instant intake" },
+  { key: "analysis", icon: Cpu, title: "AI Document Analysis", desc: "Understands intent & requirements" },
+  { key: "explain", icon: MessageCircle, title: "Simple Language Explanation", desc: "Plain-language rewrites" },
+  { key: "steps", icon: ListOrdered, title: "Step-by-Step Guidance", desc: "A checklist you can follow" },
+  { key: "form", icon: ClipboardList, title: "Form Assistance & Auto-Fill", desc: "Pre-fills verified data" },
+  { key: "reminders", icon: BellRing, title: "Checklist & Reminders", desc: "Never miss a deadline" },
+  { key: "multilingual", icon: Globe2, title: "Multilingual Support", desc: "22+ Indian languages" },
+  { key: "secure", icon: Lock, title: "Secure & Private Data Handling", desc: "End-to-end encrypted" },
+];
+
+function SolutionSection({
+  stage,
+  progress,
+  fileName,
+  onUpload,
+}: {
+  stage: Stage;
+  progress: number;
+  fileName: string | null;
+  onUpload: () => void;
+}) {
+  const activated: Record<SolutionKey, boolean> = {
+    upload: stage !== "idle",
+    analysis: stage === "done",
+    explain: stage === "done",
+    steps: stage === "done",
+    form: false,
+    reminders: false,
+    multilingual: false,
+    secure: false,
+  };
+
+  return (
+    <section id="solution" className="border-t border-border/60 bg-surface/30 py-16 md:py-24">
+      <div className="mx-auto max-w-7xl px-6">
+        <SectionHeader
+          eyebrow="Solution May Include"
+          title="An end-to-end AI toolkit"
+          subtitle="Everything a citizen needs to move from confusion to completion — in minutes, not weeks."
+          icon={<Sparkles className="h-5 w-5" />}
+        />
+
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {SOLUTIONS.map((s, i) => (
+            <StaggerTile key={s.key} delay={i * 60}>
+              <SolutionTile
+                {...s}
+                active={activated[s.key]}
+                interactive={s.key === "upload"}
+                onClick={s.key === "upload" ? onUpload : undefined}
+                stage={s.key === "upload" ? stage : undefined}
+                progress={s.key === "upload" ? progress : undefined}
+                fileName={s.key === "upload" ? fileName : undefined}
+              />
+            </StaggerTile>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SolutionTile({
+  icon: Icon,
+  title,
+  desc,
+  active,
+  interactive,
+  onClick,
+  stage,
+  progress,
+  fileName,
+}: {
+  icon: typeof UploadCloud;
+  title: string;
+  desc: string;
+  active: boolean;
+  interactive?: boolean;
+  onClick?: () => void;
+  stage?: Stage;
+  progress?: number;
+  fileName?: string | null;
+}) {
+  const Component = interactive ? "button" : "div";
+  return (
+    <Component
+      onClick={onClick}
+      className={
+        "group relative w-full overflow-hidden rounded-2xl border p-5 text-left transition-all duration-300 hover:-translate-y-1.5 hover:glow-primary " +
+        (active
+          ? "border-success/60 bg-success/5"
+          : "border-border bg-surface/60 hover:border-primary/60") +
+        (interactive ? " cursor-pointer" : "")
+      }
+    >
+      <div className="flex items-start justify-between">
+        <div
+          className={
+            "flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110 " +
+            (active ? "bg-success/20" : "bg-gradient-primary shadow-lg")
+          }
+        >
+          <Icon className={"h-6 w-6 " + (active ? "text-success" : "text-primary-foreground")} />
+        </div>
+        {active && (
+          <CheckCircle2 className="h-5 w-5 text-success animate-fade-up" />
+        )}
+      </div>
+
+      <h3 className="mt-4 text-base font-semibold">{title}</h3>
+      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{desc}</p>
+
+      {interactive && stage && stage !== "idle" && (
+        <div className="mt-4">
+          <div className="mb-1.5 flex items-center justify-between text-[11px] font-medium">
+            <span className="text-muted-foreground truncate max-w-[70%]">
+              {fileName ?? "document"}
+            </span>
+            <span className="text-primary-glow">
+              {stage === "uploading" && "Processing…"}
+              {stage === "analyzing" && "Analysis…"}
+              {stage === "done" && "Complete"}
+            </span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-background/60">
+            <div
+              className="h-full bg-gradient-primary transition-all duration-150"
+              style={{ width: `${progress ?? 0}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {interactive && stage === "idle" && (
+        <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-primary-glow">
+          <UploadCloud className="h-3.5 w-3.5" /> Click to upload
+        </div>
+      )}
+    </Component>
+  );
+}
+
+/* ---------- Impact ---------- */
+const IMPACTS = [
+  "Makes government processes easy for all",
+  "Saves time, money & reduces paperwork stress",
+  "Empowers small businesses & individuals",
+  "Promotes digital inclusion & transparency",
+];
+
+function ImpactSection() {
+  return (
+    <section id="impact" className="mx-auto max-w-7xl px-6 py-16 md:py-24">
+      <div className="rounded-3xl glass p-8 md:p-12">
+        <div className="grid gap-8 md:grid-cols-[auto,1fr] md:items-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-lg glow-primary">
+            <Sparkles className="h-8 w-8 text-primary-foreground" />
+          </div>
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-primary-glow">
+              Impact
+            </div>
+            <h2 className="mt-2 text-3xl md:text-4xl font-bold">
+              Real outcomes for <span className="text-gradient-primary">real citizens</span>
+            </h2>
+          </div>
+        </div>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+          {IMPACTS.map((line, i) => (
+            <div
+              key={line}
+              className="flex items-start gap-3 rounded-2xl border border-border bg-surface/60 p-4 animate-fade-up"
+              style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
+            >
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" />
+              <span className="text-sm text-foreground/90">{line}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Footer ---------- */
+function Footer() {
+  return (
+    <footer className="border-t border-border/60 bg-background/70">
+      <div className="mx-auto flex max-w-7xl flex-col items-center gap-2 px-6 py-8 text-center">
+        <div className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
+          Design · Build · Dominate
+        </div>
+        <div className="text-xs text-muted-foreground/70">
+          © {new Date().getFullYear()} Frontend Arena — Project Viksit Bharat 2026
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ---------- Section Header ---------- */
+function SectionHeader({
+  eyebrow,
+  title,
+  subtitle,
+  icon,
+}: {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="mx-auto max-w-3xl text-center">
+      <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-surface/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-primary-glow">
+        {icon}
+        {eyebrow}
+      </div>
+      <h2 className="text-3xl md:text-5xl font-bold leading-tight">{title}</h2>
+      <p className="mt-4 text-base md:text-lg text-muted-foreground">{subtitle}</p>
     </div>
   );
 }
