@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useCallback, useRef, useState } from "react";
 import {
   Bot,
   Brain,
@@ -20,7 +21,11 @@ import {
   Sparkles,
   ArrowRight,
   FileText,
+  AlertTriangle,
+  X,
 } from "lucide-react";
+import { analyzeDocument, type AnalysisResult } from "@/lib/analyze.functions";
+
 
 export const Route = createFileRoute("/")({
   component: Page,
@@ -36,37 +41,90 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-type Stage = "idle" | "uploading" | "analyzing" | "done";
+type Stage = "idle" | "uploading" | "analyzing" | "done" | "error";
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
 
 function Page() {
   const [assistantActive, setAssistantActive] = useState(false);
   const [stage, setStage] = useState<Stage>("idle");
   const [progress, setProgress] = useState(0);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const progressTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const analyze = useServerFn(analyzeDocument);
 
   const handleUploadClick = useCallback(() => fileInputRef.current?.click(), []);
 
-  const runProcessing = useCallback((name: string) => {
-    setFileName(name);
-    setStage("uploading");
+  const startProgress = useCallback(() => {
+    if (progressTimer.current) clearInterval(progressTimer.current);
     setProgress(0);
     let p = 0;
-    const t = setInterval(() => {
-      p += 8 + Math.random() * 10;
-      if (p >= 60 && p < 100) setStage("analyzing");
-      if (p >= 100) {
-        p = 100;
-        setStage("done");
-        clearInterval(t);
-      }
-      setProgress(Math.min(100, p));
-    }, 140);
+    progressTimer.current = setInterval(() => {
+      // Ease toward 90% while waiting on the AI; final jump to 100 on success.
+      p += Math.max(0.6, (90 - p) * 0.06);
+      setProgress(Math.min(90, p));
+    }, 160);
   }, []);
+
+  const stopProgress = useCallback((final: number) => {
+    if (progressTimer.current) {
+      clearInterval(progressTimer.current);
+      progressTimer.current = null;
+    }
+    setProgress(final);
+  }, []);
+
+  const runProcessing = useCallback(
+    async (file: File) => {
+      setFileName(file.name);
+      setResult(null);
+      setErrorMsg(null);
+      setStage("uploading");
+      startProgress();
+
+      try {
+        if (file.size > 15 * 1024 * 1024) {
+          throw new Error("File is larger than 15 MB. Please upload a smaller document.");
+        }
+        const dataBase64 = await fileToBase64(file);
+        setStage("analyzing");
+        const res = await analyze({
+          data: {
+            filename: file.name,
+            mime: file.type || "application/octet-stream",
+            dataBase64,
+          },
+        });
+        stopProgress(100);
+        setResult(res);
+        setStage("done");
+      } catch (err) {
+        stopProgress(0);
+        setStage("error");
+        setErrorMsg(err instanceof Error ? err.message : "Something went wrong analysing this document.");
+      }
+    },
+    [analyze, startProgress, stopProgress],
+  );
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f) runProcessing(f.name);
+    if (f) void runProcessing(f);
+    e.target.value = "";
   };
 
   return (
@@ -76,7 +134,7 @@ function Page() {
         type="file"
         onChange={onFileChange}
         className="hidden"
-        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp"
       />
 
       <Header />
@@ -129,11 +187,30 @@ function Page() {
         fileName={fileName}
         onUpload={handleUploadClick}
       />
+
+      {(result || errorMsg || stage === "analyzing" || stage === "uploading") && (
+        <AnalysisPanel
+          stage={stage}
+          fileName={fileName}
+          result={result}
+          errorMsg={errorMsg}
+          onDismiss={() => {
+            setResult(null);
+            setErrorMsg(null);
+            setStage("idle");
+            setFileName(null);
+            setProgress(0);
+          }}
+          onRetry={handleUploadClick}
+        />
+      )}
+
       <ImpactSection />
       <Footer />
     </main>
   );
 }
+
 
 /* ---------- Header ---------- */
 function Header() {
@@ -574,6 +651,155 @@ function Footer() {
     </footer>
   );
 }
+
+/* ---------- Analysis Panel ---------- */
+function AnalysisPanel({
+  stage,
+  fileName,
+  result,
+  errorMsg,
+  onDismiss,
+  onRetry,
+}: {
+  stage: Stage;
+  fileName: string | null;
+  result: AnalysisResult | null;
+  errorMsg: string | null;
+  onDismiss: () => void;
+  onRetry: () => void;
+}) {
+  const loading = stage === "uploading" || stage === "analyzing";
+  return (
+    <section className="mx-auto max-w-7xl px-6 pb-16">
+      <div className="rounded-3xl glass p-6 md:p-10 animate-fade-up">
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-primary shadow-lg glow-primary">
+              <Cpu className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.22em] text-primary-glow">
+                AI Analysis
+              </div>
+              <div className="text-sm text-muted-foreground truncate max-w-[60vw]">
+                {fileName ?? "document"}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={onDismiss}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:text-foreground"
+          >
+            <X className="h-3.5 w-3.5" /> Clear
+          </button>
+        </div>
+
+        {loading && (
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary/30 border-t-primary-glow" />
+            <div>
+              <div className="text-sm font-semibold">
+                {stage === "uploading" ? "Reading your document…" : "AI is analysing…"}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                This usually takes 5–20 seconds.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {errorMsg && stage === "error" && (
+          <div className="flex items-start gap-3 rounded-2xl border border-destructive/40 bg-destructive/10 p-4">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+            <div className="flex-1">
+              <div className="text-sm font-semibold">Could not analyse the document</div>
+              <div className="mt-1 text-xs text-muted-foreground">{errorMsg}</div>
+              <button
+                onClick={onRetry}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
+              >
+                <UploadCloud className="h-3.5 w-3.5" /> Try another file
+              </button>
+            </div>
+          </div>
+        )}
+
+        {result && stage === "done" && (
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="rounded-2xl border border-primary/30 bg-surface/60 p-5">
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary-glow">
+                <FileText className="h-3.5 w-3.5" /> {result.title}
+              </div>
+              <p className="text-sm text-foreground/90">{result.summary}</p>
+              <div className="mt-4 rounded-xl border border-border bg-background/40 p-4">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-primary-glow">
+                  Plain English
+                </div>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {result.plainExplanation}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-border bg-surface/60 p-5">
+                <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary-glow">
+                  <ListOrdered className="h-3.5 w-3.5" /> Step-by-step
+                </div>
+                <ol className="space-y-2 text-sm">
+                  {result.steps.map((s, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-primary text-[10px] font-bold text-primary-foreground">
+                        {i + 1}
+                      </span>
+                      <span className="text-foreground/90">{s}</span>
+                    </li>
+                  ))}
+                  {result.steps.length === 0 && (
+                    <li className="text-xs text-muted-foreground">No steps returned.</li>
+                  )}
+                </ol>
+              </div>
+
+              {result.documents.length > 0 && (
+                <div className="rounded-2xl border border-border bg-surface/60 p-5">
+                  <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary-glow">
+                    <ClipboardList className="h-3.5 w-3.5" /> Prepare
+                  </div>
+                  <ul className="grid gap-1.5 text-sm sm:grid-cols-2">
+                    {result.documents.map((d, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                        <span className="text-foreground/90">{d}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {result.warnings.length > 0 && (
+                <div className="rounded-2xl border border-amber-500/40 bg-amber-500/5 p-5">
+                  <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-amber-400">
+                    <AlertTriangle className="h-3.5 w-3.5" /> Watch out
+                  </div>
+                  <ul className="space-y-1.5 text-sm">
+                    {result.warnings.map((w, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                        <span className="text-foreground/90">{w}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 
 /* ---------- Section Header ---------- */
 function SectionHeader({
