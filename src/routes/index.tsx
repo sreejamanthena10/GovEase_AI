@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useCallback, useRef, useState } from "react";
 import {
   Bot,
   Brain,
@@ -20,7 +21,11 @@ import {
   Sparkles,
   ArrowRight,
   FileText,
+  AlertTriangle,
+  X,
 } from "lucide-react";
+import { analyzeDocument, type AnalysisResult } from "@/lib/analyze.functions";
+
 
 export const Route = createFileRoute("/")({
   component: Page,
