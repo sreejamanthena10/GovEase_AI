@@ -139,7 +139,7 @@ function Page() {
 
       <Header />
 
-      <section className="mx-auto max-w-7xl px-6 pt-10 pb-14 md:pt-16 md:pb-24 animate-fade-up">
+      <section id="upload" className="mx-auto max-w-7xl px-6 pt-10 pb-14 md:pt-16 md:pb-24 animate-fade-up">
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-14 items-stretch">
           <div className="flex flex-col justify-center animate-fade-up" style={{ animationDelay: "0.05s" }}>
             <div className="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-primary-glow">
