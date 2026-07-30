@@ -65,7 +65,9 @@ function Page() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
   const progressTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const analyze = useServerFn(analyzeDocument);
 
