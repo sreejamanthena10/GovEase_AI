@@ -619,13 +619,20 @@ function SolutionTile({
         </div>
       )}
 
-      {interactive && stage === "idle" && (
+      {cta && (
+        <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-primary-glow">
+          <ArrowRight className="h-3.5 w-3.5" /> {cta}
+        </div>
+      )}
+
+      {interactive && !cta && stage === "idle" && (
         <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-primary-glow">
           <UploadCloud className="h-3.5 w-3.5" /> Click to upload
         </div>
       )}
     </Component>
   );
+
 }
 
 /* ---------- Impact ---------- */
