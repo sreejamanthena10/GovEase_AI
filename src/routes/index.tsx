@@ -493,11 +493,13 @@ function SolutionSection({
     analysis: stage === "done",
     explain: stage === "done",
     steps: stage === "done",
-    form: false,
-    reminders: false,
-    multilingual: false,
-    secure: false,
+    form: stage === "done",
+    reminders: stage === "done",
+    multilingual: stage === "done",
+    secure: true,
   };
+
+  const toolKeys: SolutionKey[] = ["form", "reminders", "multilingual", "secure"];
 
   return (
     <section id="solution" className="border-t border-border/60 bg-surface/30 py-16 md:py-24">
@@ -510,24 +512,35 @@ function SolutionSection({
         />
 
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {SOLUTIONS.map((s, i) => (
-            <StaggerTile key={s.key} delay={i * 60}>
-              <SolutionTile
-                {...s}
-                active={activated[s.key]}
-                interactive={s.key === "upload"}
-                onClick={s.key === "upload" ? onUpload : undefined}
-                stage={s.key === "upload" ? stage : undefined}
-                progress={s.key === "upload" ? progress : undefined}
-                fileName={s.key === "upload" ? fileName : undefined}
-              />
-            </StaggerTile>
-          ))}
+          {SOLUTIONS.map((s, i) => {
+            const isTool = toolKeys.includes(s.key);
+            return (
+              <StaggerTile key={s.key} delay={i * 60}>
+                <SolutionTile
+                  {...s}
+                  active={activated[s.key]}
+                  interactive={s.key === "upload" || isTool}
+                  onClick={
+                    s.key === "upload"
+                      ? onUpload
+                      : isTool
+                        ? () => onOpenTool(s.key as ToolKey)
+                        : undefined
+                  }
+                  stage={s.key === "upload" ? stage : undefined}
+                  progress={s.key === "upload" ? progress : undefined}
+                  fileName={s.key === "upload" ? fileName : undefined}
+                  cta={isTool ? "Open tool" : undefined}
+                />
+              </StaggerTile>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
+
 
 function SolutionTile({
   icon: Icon,
