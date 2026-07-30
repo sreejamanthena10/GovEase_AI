@@ -242,13 +242,18 @@ function Header() {
         </div>
 
         <nav className="hidden items-center gap-8 md:flex">
-          {["Problem", "Challenge", "Solution", "Impact"].map((l) => (
+          {[
+            { label: "Upload", href: "#upload" },
+            { label: "Challenge", href: "#challenge" },
+            { label: "Solution", href: "#solution" },
+            { label: "Impact", href: "#impact" },
+          ].map((l) => (
             <a
-              key={l}
-              href={`#${l.toLowerCase()}`}
+              key={l.label}
+              href={l.href}
               className="text-sm font-medium text-muted-foreground transition hover:text-foreground"
             >
-              {l}
+              {l.label}
             </a>
           ))}
         </nav>
