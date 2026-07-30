@@ -142,7 +142,6 @@ function Page() {
       <section className="mx-auto max-w-7xl px-6 pt-8 pb-14 md:pt-14 md:pb-24 animate-fade-up">
         <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
           <Badge>Domain · Artificial Intelligence</Badge>
-          <Badge variant="solid">Problem Statement 12</Badge>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-stretch">
