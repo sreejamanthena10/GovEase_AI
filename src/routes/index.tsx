@@ -25,6 +25,8 @@ import {
   X,
 } from "lucide-react";
 import { analyzeDocument, type AnalysisResult } from "@/lib/analyze.functions";
+import { FeatureToolsModal, type ToolKey } from "@/components/FeatureTools";
+
 
 
 export const Route = createFileRoute("/")({
