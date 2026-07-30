@@ -73,6 +73,15 @@ function Page() {
 
   const handleUploadClick = useCallback(() => fileInputRef.current?.click(), []);
 
+  const clearAll = useCallback(() => {
+    setResult(null);
+    setErrorMsg(null);
+    setStage("idle");
+    setFileName(null);
+    setProgress(0);
+  }, []);
+
+
   const startProgress = useCallback(() => {
     if (progressTimer.current) clearInterval(progressTimer.current);
     setProgress(0);
