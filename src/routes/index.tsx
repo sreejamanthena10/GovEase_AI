@@ -198,6 +198,7 @@ function Page() {
         progress={progress}
         fileName={fileName}
         onUpload={handleUploadClick}
+        onOpenTool={setActiveTool}
       />
 
       {(result || errorMsg || stage === "analyzing" || stage === "uploading") && (
@@ -206,20 +207,25 @@ function Page() {
           fileName={fileName}
           result={result}
           errorMsg={errorMsg}
-          onDismiss={() => {
-            setResult(null);
-            setErrorMsg(null);
-            setStage("idle");
-            setFileName(null);
-            setProgress(0);
-          }}
+          onDismiss={clearAll}
           onRetry={handleUploadClick}
         />
       )}
 
       <ImpactSection />
       <Footer />
+
+      {activeTool && (
+        <FeatureToolsModal
+          toolKey={activeTool}
+          result={result}
+          fileName={fileName}
+          onClose={() => setActiveTool(null)}
+          onClearData={clearAll}
+        />
+      )}
     </main>
+
   );
 }
 
