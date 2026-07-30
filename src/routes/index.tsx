@@ -482,12 +482,15 @@ function SolutionSection({
   progress,
   fileName,
   onUpload,
+  onOpenTool,
 }: {
   stage: Stage;
   progress: number;
   fileName: string | null;
   onUpload: () => void;
+  onOpenTool: (key: ToolKey) => void;
 }) {
+
   const activated: Record<SolutionKey, boolean> = {
     upload: stage !== "idle",
     analysis: stage === "done",
