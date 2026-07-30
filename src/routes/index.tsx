@@ -31,7 +31,7 @@ export const Route = createFileRoute("/")({
   component: Page,
   head: () => ({
     meta: [
-      { title: "Project Viksit Bharat 2026 — AI Document Assistant" },
+      { title: "GovEase — AI Document Assistant" },
       {
         name: "description",
         content:
@@ -140,9 +140,6 @@ function Page() {
       <Header />
 
       <section className="mx-auto max-w-7xl px-6 pt-8 pb-14 md:pt-14 md:pb-24 animate-fade-up">
-        <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
-          <Badge>Domain · Artificial Intelligence</Badge>
-        </div>
 
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-stretch">
           <div className="flex flex-col justify-center animate-fade-up" style={{ animationDelay: "0.05s" }}>
@@ -225,7 +222,7 @@ function Header() {
               Frontend Arena
             </div>
             <div className="text-sm font-semibold">
-              Project <span className="text-gradient-primary">Viksit Bharat</span> 2026
+              <span className="text-gradient-primary">GovEase</span>
             </div>
           </div>
         </div>
@@ -644,7 +641,7 @@ function Footer() {
           Design · Build · Dominate
         </div>
         <div className="text-xs text-muted-foreground/70">
-          © {new Date().getFullYear()} Frontend Arena — Project Viksit Bharat 2026
+          © {new Date().getFullYear()} Frontend Arena — GovEase
         </div>
       </div>
     </footer>
