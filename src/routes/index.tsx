@@ -139,24 +139,26 @@ function Page() {
 
       <Header />
 
-      <section className="mx-auto max-w-7xl px-6 pt-8 pb-14 md:pt-14 md:pb-24 animate-fade-up">
-
-        <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-stretch">
+      <section className="mx-auto max-w-7xl px-6 pt-10 pb-14 md:pt-16 md:pb-24 animate-fade-up">
+        <div className="grid gap-10 lg:grid-cols-2 lg:gap-14 items-stretch">
           <div className="flex flex-col justify-center animate-fade-up" style={{ animationDelay: "0.05s" }}>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.02]">
-              Lost in <br />
-              <span className="text-gradient-primary">Government</span> <br />
-              Paperwork
+            <div className="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-primary-glow">
+              <Sparkles className="h-3.5 w-3.5" />
+              GovEase
+            </div>
+
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-[1.15] tracking-tight">
+              Simplify Government Paperwork with AI
             </h1>
-            <p className="mt-6 max-w-lg text-lg text-muted-foreground leading-relaxed">
-              A small business owner wants to register his business but cannot
-              understand lengthy government documents written in technical language.
-              We turn that friction into a guided, confident experience.
+
+            <p className="mt-5 max-w-md text-base md:text-lg text-muted-foreground leading-relaxed">
+              Upload official documents and get plain-language explanations, step-by-step guidance, and auto-filled forms in seconds.
             </p>
+
             <div className="mt-8 flex flex-wrap gap-3">
               <button
                 onClick={handleUploadClick}
-                className="group relative inline-flex items-center gap-2 rounded-full bg-gradient-primary px-6 py-3.5 font-semibold text-primary-foreground shadow-lg glow-primary animate-pulse-ring transition-transform hover:scale-[1.03] active:scale-[0.98]"
+                className="group relative inline-flex items-center gap-2 rounded-full bg-gradient-primary px-6 py-3.5 font-semibold text-primary-foreground shadow-lg glow-primary transition-transform hover:scale-[1.03] active:scale-[0.98]"
               >
                 <UploadCloud className="h-5 w-5" />
                 Upload and Simplify
@@ -166,9 +168,21 @@ function Page() {
                 onClick={() => setAssistantActive((v) => !v)}
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-6 py-3.5 font-medium text-foreground/90 transition hover:border-primary/60 hover:text-foreground"
               >
-                <Sparkles className="h-4 w-4 text-primary-glow" />
-                {assistantActive ? "Hide" : "Preview"} Assistant
+                <Bot className="h-4 w-4 text-primary-glow" />
+                {assistantActive ? "Hide" : "Ask"} Assistant
               </button>
+            </div>
+
+            <div className="mt-8 flex items-center gap-4 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-success" /> Secure
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-success" /> Free to try
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Globe2 className="h-3.5 w-3.5 text-success" /> Made for India
+              </span>
             </div>
           </div>
 
