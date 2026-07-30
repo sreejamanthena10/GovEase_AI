@@ -25,6 +25,8 @@ import {
   X,
 } from "lucide-react";
 import { analyzeDocument, type AnalysisResult } from "@/lib/analyze.functions";
+import { FeatureToolsModal, type ToolKey } from "@/components/FeatureTools";
+
 
 
 export const Route = createFileRoute("/")({
@@ -63,11 +65,22 @@ function Page() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
   const progressTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const analyze = useServerFn(analyzeDocument);
 
   const handleUploadClick = useCallback(() => fileInputRef.current?.click(), []);
+
+  const clearAll = useCallback(() => {
+    setResult(null);
+    setErrorMsg(null);
+    setStage("idle");
+    setFileName(null);
+    setProgress(0);
+  }, []);
+
 
   const startProgress = useCallback(() => {
     if (progressTimer.current) clearInterval(progressTimer.current);
@@ -196,6 +209,7 @@ function Page() {
         progress={progress}
         fileName={fileName}
         onUpload={handleUploadClick}
+        onOpenTool={setActiveTool}
       />
 
       {(result || errorMsg || stage === "analyzing" || stage === "uploading") && (
@@ -204,20 +218,25 @@ function Page() {
           fileName={fileName}
           result={result}
           errorMsg={errorMsg}
-          onDismiss={() => {
-            setResult(null);
-            setErrorMsg(null);
-            setStage("idle");
-            setFileName(null);
-            setProgress(0);
-          }}
+          onDismiss={clearAll}
           onRetry={handleUploadClick}
         />
       )}
 
       <ImpactSection />
       <Footer />
+
+      {activeTool && (
+        <FeatureToolsModal
+          toolKey={activeTool}
+          result={result}
+          fileName={fileName}
+          onClose={() => setActiveTool(null)}
+          onClearData={clearAll}
+        />
+      )}
     </main>
+
   );
 }
 
@@ -482,22 +501,27 @@ function SolutionSection({
   progress,
   fileName,
   onUpload,
+  onOpenTool,
 }: {
   stage: Stage;
   progress: number;
   fileName: string | null;
   onUpload: () => void;
+  onOpenTool: (key: ToolKey) => void;
 }) {
+
   const activated: Record<SolutionKey, boolean> = {
     upload: stage !== "idle",
     analysis: stage === "done",
     explain: stage === "done",
     steps: stage === "done",
-    form: false,
-    reminders: false,
-    multilingual: false,
-    secure: false,
+    form: stage === "done",
+    reminders: stage === "done",
+    multilingual: stage === "done",
+    secure: true,
   };
+
+  const toolKeys: SolutionKey[] = ["form", "reminders", "multilingual", "secure"];
 
   return (
     <section id="solution" className="border-t border-border/60 bg-surface/30 py-16 md:py-24">
@@ -510,24 +534,35 @@ function SolutionSection({
         />
 
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {SOLUTIONS.map((s, i) => (
-            <StaggerTile key={s.key} delay={i * 60}>
-              <SolutionTile
-                {...s}
-                active={activated[s.key]}
-                interactive={s.key === "upload"}
-                onClick={s.key === "upload" ? onUpload : undefined}
-                stage={s.key === "upload" ? stage : undefined}
-                progress={s.key === "upload" ? progress : undefined}
-                fileName={s.key === "upload" ? fileName : undefined}
-              />
-            </StaggerTile>
-          ))}
+          {SOLUTIONS.map((s, i) => {
+            const isTool = toolKeys.includes(s.key);
+            return (
+              <StaggerTile key={s.key} delay={i * 60}>
+                <SolutionTile
+                  {...s}
+                  active={activated[s.key]}
+                  interactive={s.key === "upload" || isTool}
+                  onClick={
+                    s.key === "upload"
+                      ? onUpload
+                      : isTool
+                        ? () => onOpenTool(s.key as ToolKey)
+                        : undefined
+                  }
+                  stage={s.key === "upload" ? stage : undefined}
+                  progress={s.key === "upload" ? progress : undefined}
+                  fileName={s.key === "upload" ? fileName : undefined}
+                  cta={isTool ? "Open tool" : undefined}
+                />
+              </StaggerTile>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
+
 
 function SolutionTile({
   icon: Icon,
@@ -539,6 +574,7 @@ function SolutionTile({
   stage,
   progress,
   fileName,
+  cta,
 }: {
   icon: typeof UploadCloud;
   title: string;
@@ -549,7 +585,9 @@ function SolutionTile({
   stage?: Stage;
   progress?: number;
   fileName?: string | null;
+  cta?: string;
 }) {
+
   const Component = interactive ? "button" : "div";
   return (
     <Component
@@ -600,13 +638,20 @@ function SolutionTile({
         </div>
       )}
 
-      {interactive && stage === "idle" && (
+      {cta && (
+        <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-primary-glow">
+          <ArrowRight className="h-3.5 w-3.5" /> {cta}
+        </div>
+      )}
+
+      {interactive && !cta && stage === "idle" && (
         <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-primary-glow">
           <UploadCloud className="h-3.5 w-3.5" /> Click to upload
         </div>
       )}
     </Component>
   );
+
 }
 
 /* ---------- Impact ---------- */
