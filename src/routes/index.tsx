@@ -555,6 +555,7 @@ function SolutionTile({
   stage,
   progress,
   fileName,
+  cta,
 }: {
   icon: typeof UploadCloud;
   title: string;
@@ -565,7 +566,9 @@ function SolutionTile({
   stage?: Stage;
   progress?: number;
   fileName?: string | null;
+  cta?: string;
 }) {
+
   const Component = interactive ? "button" : "div";
   return (
     <Component
