@@ -261,7 +261,7 @@ function Header() {
         <nav className="hidden items-center gap-8 md:flex">
           {[
             { label: "Upload", href: "#upload" },
-            { label: "FormSync", href: "#formsync" },
+            { label: "Features", href: "#formsync" },
           ].map((l) => (
             <a
               key={l.label}
@@ -329,6 +329,38 @@ function AssistantCard({ active, onToggle }: { active: boolean; onToggle: () => 
         <div className="absolute inset-0 [backface-visibility:hidden] rounded-3xl glass overflow-hidden ring-1 ring-primary/20 transition-shadow duration-500 group-hover:ring-primary/50 group-hover:glow-primary">
           <div className="relative h-full w-full">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-transparent to-primary-glow/20 transition-opacity duration-500 group-hover:opacity-80" />
+            {/* Mock document preview */}
+            <div className="pointer-events-none absolute inset-x-0 top-24 flex justify-center">
+              <div className="relative w-[62%] max-w-[280px] rotate-[-4deg] rounded-xl border border-border bg-background/80 p-4 shadow-2xl backdrop-blur-md transition-transform duration-500 group-hover:rotate-[-1deg] group-hover:scale-[1.03]">
+                <div className="mb-3 flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary-glow" />
+                  <div className="h-2 w-20 rounded-full bg-muted-foreground/40" />
+                </div>
+                <div className="space-y-2">
+                  {[100, 88, 94, 70, 82, 60].map((w, i) => (
+                    <div
+                      key={i}
+                      className="h-1.5 rounded-full bg-muted-foreground/25"
+                      style={{ width: `${w}%` }}
+                    />
+                  ))}
+                </div>
+                <div className="mt-4 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-primary-glow" />
+                  <div className="h-1.5 w-24 rounded-full bg-primary/50" />
+                </div>
+                <div
+                  className="absolute -right-6 -bottom-5 w-[55%] rotate-[7deg] rounded-lg border border-border bg-surface-elevated/90 p-3 shadow-xl animate-float"
+                  style={{ animationDelay: "0.4s" }}
+                >
+                  <div className="mb-2 h-1.5 w-12 rounded-full bg-primary/60" />
+                  <div className="space-y-1.5">
+                    <div className="h-1 w-full rounded-full bg-muted-foreground/25" />
+                    <div className="h-1 w-3/4 rounded-full bg-muted-foreground/25" />
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="absolute inset-0 flex flex-col justify-end p-8">
               <div className="max-w-sm rounded-2xl bg-background/70 p-5 backdrop-blur-md border border-border">
                 <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary-glow">
