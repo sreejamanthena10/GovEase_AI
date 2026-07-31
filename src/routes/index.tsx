@@ -203,7 +203,6 @@ function Page() {
         </div>
       </section>
 
-      <ChallengeSection />
       <SolutionSection
         stage={stage}
         progress={progress}
