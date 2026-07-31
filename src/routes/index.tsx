@@ -261,9 +261,7 @@ function Header() {
         <nav className="hidden items-center gap-8 md:flex">
           {[
             { label: "Upload", href: "#upload" },
-            { label: "Challenge", href: "#challenge" },
-            { label: "Solution", href: "#solution" },
-            { label: "Impact", href: "#impact" },
+            { label: "FormSync", href: "#formsync" },
           ].map((l) => (
             <a
               key={l.label}
