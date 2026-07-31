@@ -470,10 +470,10 @@ function SolutionSection({
   const toolKeys: SolutionKey[] = ["form", "reminders", "multilingual", "secure"];
 
   return (
-    <section id="solution" className="border-t border-border/60 bg-surface/30 py-16 md:py-24">
+    <section id="formsync" className="border-t border-border/60 bg-surface/30 py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader
-          eyebrow="Solution May Include"
+          eyebrow="FormSync"
           title="An end-to-end AI toolkit"
           subtitle="Everything a citizen needs to move from confusion to completion — in minutes, not weeks."
           icon={<Sparkles className="h-5 w-5" />}
