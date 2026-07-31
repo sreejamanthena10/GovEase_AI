@@ -658,47 +658,6 @@ function SolutionTile({
 
 }
 
-/* ---------- Impact ---------- */
-const IMPACTS = [
-  "Makes government processes easy for all",
-  "Saves time, money & reduces paperwork stress",
-  "Empowers small businesses & individuals",
-  "Promotes digital inclusion & transparency",
-];
-
-function ImpactSection() {
-  return (
-    <section id="impact" className="mx-auto max-w-7xl px-6 py-16 md:py-24">
-      <div className="rounded-3xl glass p-8 md:p-12">
-        <div className="grid gap-8 md:grid-cols-[auto,1fr] md:items-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-lg glow-primary">
-            <Sparkles className="h-8 w-8 text-primary-foreground" />
-          </div>
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-primary-glow">
-              Impact
-            </div>
-            <h2 className="mt-2 text-3xl md:text-4xl font-bold">
-              Real outcomes for <span className="text-gradient-primary">real citizens</span>
-            </h2>
-          </div>
-        </div>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          {IMPACTS.map((line, i) => (
-            <div
-              key={line}
-              className="flex items-start gap-3 rounded-2xl border border-border bg-surface/60 p-4 animate-fade-up"
-              style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
-            >
-              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" />
-              <span className="text-sm text-foreground/90">{line}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ---------- Footer ---------- */
 function Footer() {
