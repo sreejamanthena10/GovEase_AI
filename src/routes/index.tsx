@@ -203,7 +203,6 @@ function Page() {
         </div>
       </section>
 
-      <ChallengeSection />
       <SolutionSection
         stage={stage}
         progress={progress}
@@ -223,7 +222,6 @@ function Page() {
         />
       )}
 
-      <ImpactSection />
       <Footer />
 
       {activeTool && (
@@ -263,9 +261,7 @@ function Header() {
         <nav className="hidden items-center gap-8 md:flex">
           {[
             { label: "Upload", href: "#upload" },
-            { label: "Challenge", href: "#challenge" },
-            { label: "Solution", href: "#solution" },
-            { label: "Impact", href: "#impact" },
+            { label: "FormSync", href: "#formsync" },
           ].map((l) => (
             <a
               key={l.label}
@@ -415,60 +411,6 @@ function ChatBubble({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* ---------- Challenge Section ---------- */
-const CHALLENGES = [
-  { icon: Brain, title: "Understand", desc: "AI reads & understands complex documents" },
-  { icon: MessageSquareText, title: "Explain Simply", desc: "Converts technical language into simple terms" },
-  { icon: ListChecks, title: "Guide Step-by-Step", desc: "Provides clear actions & next steps" },
-  { icon: FileEdit, title: "Auto-Fill Forms", desc: "Helps fill forms with correct information" },
-  { icon: ShieldCheck, title: "Build Confidence", desc: "Empowers citizens to complete processes easily" },
-  { icon: Target, title: "Real Impact", desc: "Reduces friction across government workflows" },
-];
-
-function ChallengeSection() {
-  return (
-    <section id="challenge" className="mx-auto max-w-7xl px-6 py-16 md:py-24">
-      <SectionHeader
-        eyebrow="Your Challenge"
-        title="Build an AI-powered assistant"
-        subtitle="that explains official documents in simple language and helps citizens complete government processes with confidence."
-        icon={<Target className="h-5 w-5" />}
-      />
-
-      <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {CHALLENGES.map((c, i) => (
-          <StaggerTile key={c.title} delay={i * 70}>
-            <ChallengeTile icon={c.icon} title={c.title} desc={c.desc} />
-          </StaggerTile>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function ChallengeTile({
-  icon: Icon,
-  title,
-  desc,
-}: {
-  icon: typeof Brain;
-  title: string;
-  desc: string;
-}) {
-  return (
-    <div className="group relative aspect-square rounded-2xl border border-border bg-surface/50 p-5 transition-all duration-300 hover:-translate-y-2 hover:border-primary/60 hover:glow-primary">
-      <div className="flex h-full flex-col">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-primary shadow-lg transition-transform group-hover:scale-110">
-          <Icon className="h-6 w-6 text-primary-foreground" />
-        </div>
-        <div className="mt-auto">
-          <h3 className="text-base font-semibold">{title}</h3>
-          <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{desc}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function StaggerTile({ children, delay }: { children: React.ReactNode; delay: number }) {
   return (
@@ -528,10 +470,10 @@ function SolutionSection({
   const toolKeys: SolutionKey[] = ["form", "reminders", "multilingual", "secure"];
 
   return (
-    <section id="solution" className="border-t border-border/60 bg-surface/30 py-16 md:py-24">
+    <section id="formsync" className="border-t border-border/60 bg-surface/30 py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader
-          eyebrow="Solution May Include"
+          eyebrow="FormSync"
           title="An end-to-end AI toolkit"
           subtitle="Everything a citizen needs to move from confusion to completion — in minutes, not weeks."
           icon={<Sparkles className="h-5 w-5" />}
@@ -658,47 +600,6 @@ function SolutionTile({
 
 }
 
-/* ---------- Impact ---------- */
-const IMPACTS = [
-  "Makes government processes easy for all",
-  "Saves time, money & reduces paperwork stress",
-  "Empowers small businesses & individuals",
-  "Promotes digital inclusion & transparency",
-];
-
-function ImpactSection() {
-  return (
-    <section id="impact" className="mx-auto max-w-7xl px-6 py-16 md:py-24">
-      <div className="rounded-3xl glass p-8 md:p-12">
-        <div className="grid gap-8 md:grid-cols-[auto,1fr] md:items-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-lg glow-primary">
-            <Sparkles className="h-8 w-8 text-primary-foreground" />
-          </div>
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-primary-glow">
-              Impact
-            </div>
-            <h2 className="mt-2 text-3xl md:text-4xl font-bold">
-              Real outcomes for <span className="text-gradient-primary">real citizens</span>
-            </h2>
-          </div>
-        </div>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          {IMPACTS.map((line, i) => (
-            <div
-              key={line}
-              className="flex items-start gap-3 rounded-2xl border border-border bg-surface/60 p-4 animate-fade-up"
-              style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
-            >
-              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" />
-              <span className="text-sm text-foreground/90">{line}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ---------- Footer ---------- */
 function Footer() {
