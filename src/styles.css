@@ -65,7 +65,7 @@
 
 .dark { color-scheme: dark; }
 
-html, body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); }
+html, body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); overflow-x: hidden; max-width: 100vw; }
 
 @layer base {
   * { border-color: var(--color-border); }
