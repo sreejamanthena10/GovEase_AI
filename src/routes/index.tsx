@@ -251,11 +251,11 @@ function Header() {
             <span className="font-display text-lg font-bold text-primary-foreground">A</span>
           </div>
           <div className="leading-tight">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Frontend Arena
-            </div>
-            <div className="text-sm font-semibold">
+            <div className="font-display text-xl font-bold tracking-tight md:text-2xl">
               <span className="text-gradient-primary">GovEase</span>
+            </div>
+            <div className="text-[9px] font-medium uppercase tracking-[0.28em] text-muted-foreground/70">
+              Frontend Arena
             </div>
           </div>
         </div>
