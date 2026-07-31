@@ -222,7 +222,6 @@ function Page() {
         />
       )}
 
-      <ImpactSection />
       <Footer />
 
       {activeTool && (
