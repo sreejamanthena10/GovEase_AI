@@ -251,11 +251,11 @@ function Header() {
             <span className="font-display text-lg font-bold text-primary-foreground">A</span>
           </div>
           <div className="leading-tight">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Frontend Arena
-            </div>
-            <div className="text-sm font-semibold">
+            <div className="font-display text-xl font-bold tracking-tight md:text-2xl">
               <span className="text-gradient-primary">GovEase</span>
+            </div>
+            <div className="text-[9px] font-medium uppercase tracking-[0.28em] text-muted-foreground/70">
+              Frontend Arena
             </div>
           </div>
         </div>
@@ -318,19 +318,21 @@ function Badge({
 function AssistantCard({ active, onToggle }: { active: boolean; onToggle: () => void }) {
   return (
     <div
-      className="relative min-h-[440px] lg:min-h-[520px] [perspective:1600px] animate-fade-up"
+      className="group relative min-h-[440px] lg:min-h-[520px] [perspective:1600px] animate-fade-up cursor-pointer"
       style={{ animationDelay: "0.15s" }}
       onMouseEnter={() => !active && onToggle()}
       onMouseLeave={() => active && onToggle()}
+      onClick={onToggle}
     >
+      <div className="pointer-events-none absolute -inset-4 rounded-[2rem] bg-gradient-primary opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-25" />
       <div
-        className="relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d]"
+        className="relative h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] [transform-style:preserve-3d] group-hover:-translate-y-1"
         style={{ transform: active ? "rotateY(180deg)" : "rotateY(0deg)" }}
       >
         {/* Front */}
-        <div className="absolute inset-0 [backface-visibility:hidden] rounded-3xl glass overflow-hidden">
+        <div className="absolute inset-0 [backface-visibility:hidden] rounded-3xl glass overflow-hidden ring-1 ring-primary/20 transition-shadow duration-500 group-hover:ring-primary/50 group-hover:glow-primary">
           <div className="relative h-full w-full">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-transparent to-primary-glow/20" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-transparent to-primary-glow/20 transition-opacity duration-500 group-hover:opacity-80" />
             <div className="absolute inset-0 flex flex-col justify-end p-8">
               <div className="max-w-sm rounded-2xl bg-background/70 p-5 backdrop-blur-md border border-border">
                 <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary-glow">
@@ -341,11 +343,13 @@ function AssistantCard({ active, onToggle }: { active: boolean; onToggle: () => 
                 </p>
               </div>
             </div>
-            <div className="absolute top-6 right-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-elevated border border-primary/40 animate-float">
+            <div className="absolute top-6 right-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-elevated border border-primary/40 animate-float transition-transform duration-500 group-hover:scale-110">
               <Brain className="h-7 w-7 text-primary-glow" />
             </div>
-            <div className="absolute top-6 left-6 rounded-full bg-background/70 backdrop-blur px-3 py-1 text-xs text-muted-foreground">
-              Hover to meet the AI →
+            <div className="absolute top-6 left-6 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-background/70 px-3 py-1.5 text-xs font-medium text-primary-glow backdrop-blur animate-pulse-ring">
+              <Bot className="h-3.5 w-3.5" />
+              Hover to meet the AI
+              <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
             </div>
           </div>
         </div>
