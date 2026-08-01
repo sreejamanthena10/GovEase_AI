@@ -774,7 +774,16 @@ function AnalysisPanel({
               </div>
             </div>
           </div>
-          <div className="w-9" />
+          {result && stage === "done" ? (
+            <button
+              onClick={() => downloadFile("govease-formsync-result.txt", formatResultAsText(result, fileName))}
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-lg transition hover:scale-[1.03] active:scale-[0.98]"
+            >
+              <Download className="h-3.5 w-3.5" /> Download result
+            </button>
+          ) : (
+            <div className="w-9" />
+          )}
         </div>
 
         {loading && (
