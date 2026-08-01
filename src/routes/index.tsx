@@ -132,17 +132,6 @@ function Page() {
 
   const handleUploadClick = useCallback(() => fileInputRef.current?.click(), []);
 
-  useEffect(() => {
-    if (!overlayOpen) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOverlayOpen(false);
-    window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [overlayOpen]);
-
   const clearAll = useCallback(() => {
     setResult(null);
     setErrorMsg(null);
