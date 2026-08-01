@@ -22,7 +22,6 @@ import {
   ArrowRight,
   FileText,
   AlertTriangle,
-  X,
   Download,
 } from "lucide-react";
 import { analyzeDocument, type AnalysisResult } from "@/lib/analyze.functions";
