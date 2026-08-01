@@ -717,13 +717,7 @@ function AnalysisPanel({
               </div>
             </div>
           </div>
-          <button
-            onClick={onDismiss}
-            aria-label="Close"
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:text-foreground"
-          >
-            <X className="h-3.5 w-3.5" /> Close
-          </button>
+          <div className="w-9" />
         </div>
 
         {loading && (
