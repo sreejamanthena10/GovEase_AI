@@ -211,15 +211,35 @@ function Page() {
         onOpenTool={setActiveTool}
       />
 
-      {(result || errorMsg || stage === "analyzing" || stage === "uploading") && (
-        <AnalysisPanel
-          stage={stage}
-          fileName={fileName}
-          result={result}
-          errorMsg={errorMsg}
-          onDismiss={clearAll}
-          onRetry={handleUploadClick}
-        />
+      {overlayOpen && (
+        <div
+          className="fixed inset-0 z-50 flex justify-end bg-background/70 backdrop-blur-md animate-fade-up"
+          onClick={() => setOverlayOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Document analysis"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative h-full w-full max-w-3xl overflow-y-auto border-l border-border glass shadow-2xl animate-fade-up"
+          >
+            <button
+              onClick={() => setOverlayOpen(false)}
+              aria-label="Close analysis"
+              className="absolute right-4 top-4 z-10 rounded-full border border-border bg-surface/80 p-2 text-muted-foreground transition hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <AnalysisPanel
+              stage={stage}
+              fileName={fileName}
+              result={result}
+              errorMsg={errorMsg}
+              onDismiss={() => setOverlayOpen(false)}
+              onRetry={handleUploadClick}
+            />
+          </div>
+        </div>
       )}
 
       <Footer />
