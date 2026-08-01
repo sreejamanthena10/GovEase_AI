@@ -66,6 +66,7 @@ function Page() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
+  const [overlayOpen, setOverlayOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const progressTimer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -73,12 +74,24 @@ function Page() {
 
   const handleUploadClick = useCallback(() => fileInputRef.current?.click(), []);
 
+  useEffect(() => {
+    if (!overlayOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOverlayOpen(false);
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [overlayOpen]);
+
   const clearAll = useCallback(() => {
     setResult(null);
     setErrorMsg(null);
     setStage("idle");
     setFileName(null);
     setProgress(0);
+    setOverlayOpen(false);
   }, []);
 
 
