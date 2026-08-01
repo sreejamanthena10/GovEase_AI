@@ -120,6 +120,7 @@ function Page() {
       setResult(null);
       setErrorMsg(null);
       setStage("uploading");
+      setOverlayOpen(true);
       startProgress();
 
       try {
