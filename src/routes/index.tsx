@@ -23,6 +23,7 @@ import {
   FileText,
   AlertTriangle,
   X,
+  Download,
 } from "lucide-react";
 import { analyzeDocument, type AnalysisResult } from "@/lib/analyze.functions";
 import { FeatureToolsModal, type ToolKey } from "@/components/FeatureTools";
@@ -56,6 +57,62 @@ function fileToBase64(file: File): Promise<string> {
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
   });
+}
+
+function downloadFile(filename: string, content: string, type = "text/plain;charset=utf-8") {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function formatResultAsText(result: AnalysisResult, fileName: string | null): string {
+  const sections: string[] = [];
+  sections.push(`GovEase — Simplified FormSync Result`);
+  sections.push(`Document: ${fileName ?? "Unknown document"}`);
+  sections.push(`Generated: ${new Date().toLocaleString()}`);
+  sections.push("");
+  sections.push(`TITLE: ${result.title}`);
+  sections.push("");
+  sections.push("SUMMARY");
+  sections.push(result.summary);
+  sections.push("");
+  sections.push("PLAIN ENGLISH EXPLANATION");
+  sections.push(result.plainExplanation);
+  sections.push("");
+  if (result.steps.length) {
+    sections.push("STEP-BY-STEP GUIDANCE");
+    result.steps.forEach((s, i) => sections.push(`${i + 1}. ${s}`));
+    sections.push("");
+  }
+  if (result.documents.length) {
+    sections.push("DOCUMENTS / INFORMATION TO PREPARE");
+    result.documents.forEach((d) => sections.push(`• ${d}`));
+    sections.push("");
+  }
+  if (result.warnings.length) {
+    sections.push("IMPORTANT WARNINGS");
+    result.warnings.forEach((w) => sections.push(`⚠ ${w}`));
+    sections.push("");
+  }
+  if (result.formFields.length) {
+    sections.push("FORM AUTO-FILL FIELDS");
+    result.formFields.forEach((f) => sections.push(`${f.label}: ${f.value || "—"}`));
+    sections.push("");
+  }
+  if (result.reminders.length) {
+    sections.push("REMINDERS / DEADLINES");
+    result.reminders.forEach((r) => {
+      const due = new Date(Date.now() + r.dueInDays * 86400000).toLocaleDateString();
+      sections.push(`• ${r.label} — due around ${due}`);
+    });
+    sections.push("");
+  }
+  sections.push("— Exported from GovEase");
+  return sections.join("\n");
 }
 
 function Page() {
@@ -717,7 +774,16 @@ function AnalysisPanel({
               </div>
             </div>
           </div>
-          <div className="w-9" />
+          {result && stage === "done" ? (
+            <button
+              onClick={() => downloadFile("govease-formsync-result.txt", formatResultAsText(result, fileName))}
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-lg transition hover:scale-[1.03] active:scale-[0.98]"
+            >
+              <Download className="h-3.5 w-3.5" /> Download result
+            </button>
+          ) : (
+            <div className="w-9" />
+          )}
         </div>
 
         {loading && (
