@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Bot,
   Brain,
@@ -66,6 +66,7 @@ function Page() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
+  const [overlayOpen, setOverlayOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const progressTimer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -73,12 +74,24 @@ function Page() {
 
   const handleUploadClick = useCallback(() => fileInputRef.current?.click(), []);
 
+  useEffect(() => {
+    if (!overlayOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOverlayOpen(false);
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [overlayOpen]);
+
   const clearAll = useCallback(() => {
     setResult(null);
     setErrorMsg(null);
     setStage("idle");
     setFileName(null);
     setProgress(0);
+    setOverlayOpen(false);
   }, []);
 
 
@@ -107,6 +120,7 @@ function Page() {
       setResult(null);
       setErrorMsg(null);
       setStage("uploading");
+      setOverlayOpen(true);
       startProgress();
 
       try {
@@ -211,15 +225,35 @@ function Page() {
         onOpenTool={setActiveTool}
       />
 
-      {(result || errorMsg || stage === "analyzing" || stage === "uploading") && (
-        <AnalysisPanel
-          stage={stage}
-          fileName={fileName}
-          result={result}
-          errorMsg={errorMsg}
-          onDismiss={clearAll}
-          onRetry={handleUploadClick}
-        />
+      {overlayOpen && (
+        <div
+          className="fixed inset-0 z-50 flex justify-end bg-background/70 backdrop-blur-md animate-fade-up"
+          onClick={() => setOverlayOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Document analysis"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative h-full w-full max-w-3xl overflow-y-auto border-l border-border glass shadow-2xl animate-fade-up"
+          >
+            <button
+              onClick={() => setOverlayOpen(false)}
+              aria-label="Close analysis"
+              className="absolute right-4 top-4 z-10 rounded-full border border-border bg-surface/80 p-2 text-muted-foreground transition hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <AnalysisPanel
+              stage={stage}
+              fileName={fileName}
+              result={result}
+              errorMsg={errorMsg}
+              onDismiss={() => setOverlayOpen(false)}
+              onRetry={handleUploadClick}
+            />
+          </div>
+        </div>
       )}
 
       <Footer />
@@ -667,8 +701,8 @@ function AnalysisPanel({
 }) {
   const loading = stage === "uploading" || stage === "analyzing";
   return (
-    <section className="mx-auto max-w-7xl px-6 pb-16">
-      <div className="rounded-3xl glass p-6 md:p-10 animate-fade-up">
+    <div>
+      <div className="p-6 md:p-8">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-primary shadow-lg glow-primary">
@@ -683,12 +717,7 @@ function AnalysisPanel({
               </div>
             </div>
           </div>
-          <button
-            onClick={onDismiss}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:text-foreground"
-          >
-            <X className="h-3.5 w-3.5" /> Clear
-          </button>
+          <div className="w-9" />
         </div>
 
         {loading && (
@@ -793,7 +822,7 @@ function AnalysisPanel({
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }
 
