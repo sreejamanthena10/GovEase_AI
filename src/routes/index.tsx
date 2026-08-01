@@ -667,8 +667,8 @@ function AnalysisPanel({
 }) {
   const loading = stage === "uploading" || stage === "analyzing";
   return (
-    <section className="mx-auto max-w-7xl px-6 pb-16">
-      <div className="rounded-3xl glass p-6 md:p-10 animate-fade-up">
+    <div>
+      <div className="p-6 md:p-8">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-primary shadow-lg glow-primary">
