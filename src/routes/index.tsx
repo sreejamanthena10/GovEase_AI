@@ -793,7 +793,7 @@ function AnalysisPanel({
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }
 
